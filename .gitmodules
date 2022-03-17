@@ -1,0 +1,3 @@
+[submodule "aplication/utils/fractal_image_compression"]
+	path = aplication/utils/fractal_image_compression
+	url = https://github.com/pvigier/fractal-image-compression.git
