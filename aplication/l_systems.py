@@ -1,21 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import chart_studio.plotly
 import os
+from . import utils
 
-
-class Stack:
-    def __init__(self):
-        self.stack = []
-
-    def add(self, dataval):
-        self.stack.append(dataval)
-        
-    def remove(self):
-        if len(self.stack) <= 0:
-            raise()
-        else:
-            return self.stack.pop()
-        
 class Linha():
     
     def __init__(self, start_position, end_position, size, width, color):
@@ -37,8 +25,8 @@ class L_system():
         self.size, self.d_width, self.d_color = size, width, color
         self.string = initial_string
         self.re_write_rules = re_write_rules
-        self.stack_pos = Stack()
-        self.stack_angle = Stack()
+        self.stack_pos = utils.data_structures.Stack()
+        self.stack_angle = utils.data_structures.Stack()
         self.angle_operations = {
             '+' : lambda x : x.angle + self.angle_diff,
             '-' : lambda x : x.angle - self.angle_diff
@@ -123,7 +111,8 @@ class L_system():
         
     
     def save_image(self, filename):
-        plt.savefig(filename)
+        plt.savefig(f'output/{filename}.png')
+        return f'output/{filename}.png'
     
     def save_animation(self, filename, iterations, background = None):
         verify_or_create_folder(filename)
@@ -132,6 +121,10 @@ class L_system():
             self.plot()
             plt.savefig(f'output/{filename}/{filename}_{i}.png', facecolor=background)
             plt.show()
+
+    def to_plotly(self, background = None):
+        mpl_fig = plt.figure()
+        return chart_studio.plotly.plot_mpl(mpl_fig)
 
     def clear(self):
         self.string = ''
