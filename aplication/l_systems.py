@@ -1,6 +1,7 @@
+from email.policy import default
 import matplotlib.pyplot as plt
 import numpy as np
-import chart_studio.plotly
+import chart_studio
 import os
 from . import utils
 
@@ -17,26 +18,27 @@ class L_system():
 
     def __init__(self, initial_string, re_write_rules, size = 1, width = 1, color = '#000000'):
         '''
-        re_write_rules - dicionário com as regras de produção para cada simbolo
+        re_write_rules - dicionário com as regras de produção para cada simbolo, podendo conter também, cor, tamanho, grossura da linha e diferença de ângulo
         symbols - lista de simbolos que não serão ignorados pelo programa
         O caractere padrão para o desenho de uma linha é "F"
         '''
-        self.d_position, self.lines, self.angle, self.angle_diff = (0,0), [], 90, 33
+        self.d_position, self.lines, self.angle, self.angle_diff = (0,0), [], 90, 33 
         self.size, self.d_width, self.d_color = size, width, color
-        self.string = initial_string
-        self.re_write_rules = re_write_rules
+        self.default = [self.size, self.d_width, self.d_color, self.angle_diff]
+        self.re_write_rules = utils.general.format_re_write_rules(re_write_rules, self.default)
+        self.string = utils.List_of_chars(utils.general.get_char(c, self.default, re_write_rules) for c in initial_string)
         self.stack_pos = utils.data_structures.Stack()
         self.stack_angle = utils.data_structures.Stack()
         self.angle_operations = {
-            '+' : lambda x : x.angle + self.angle_diff,
-            '-' : lambda x : x.angle - self.angle_diff
+            'C(+)' : lambda x : x.angle + self.angle_diff,
+            'C(-)' : lambda x : x.angle - self.angle_diff
         }
         self.position_operators = {
-            'F' : self.draw_segment
+            'C(F)' : self.draw_segment
         }
         self.storage_operators = {
-            '[' : self.store_state,
-            ']' : self.return_state
+            'C([)' : self.store_state,
+            'C(])' : self.return_state
         }
     
     def set_color(self, color):
@@ -73,17 +75,18 @@ class L_system():
         self.lines = []
         
         for sub_string in self.re_write_rules.keys():
-            self.string = self.string.replace(sub_string, self.re_write_rules[sub_string])
+            self.string = self.string.replace(sub_string, self.re_write_rules[sub_string]['r'])
         
         for carac in self.string:
-                if carac in self.angle_operations.keys():
-                    self.angle = self.angle_operations[carac](self)
+            carac = str(carac)
+            if carac in self.angle_operations.keys():
+                self.angle = self.angle_operations[carac](self)
 
-                elif carac in self.position_operators.keys():
-                    self.position_operators[carac]()
+            elif carac in self.position_operators.keys():
+                self.position_operators[carac]()
 
-                elif carac in self.storage_operators.keys():
-                    self.storage_operators[carac]()
+            elif carac in self.storage_operators.keys():
+                self.storage_operators[carac]()
 
     def plot(self, background = None):
         for line in self.lines:
@@ -133,6 +136,16 @@ class L_system():
         self.angle = 90
         self.stack_pos.stack = []
         self.stack_angle.stack = []
+    
+    def get_length(self):
+        return self.string.length()
+    
+    def get_ramifications_number(self):
+        return self.string.count(']')
+
+    def get_angular_variation_local(self, index_start, index_end):
+        pass
+
 
 def verify_or_create_folder(folder):
     if not os.path.exists(f'output/{folder}'):
