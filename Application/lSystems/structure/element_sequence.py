@@ -1,13 +1,13 @@
-class List_of_chars(list):
+class Element_sequence(list):
 
     def __init__(self, *args):
-        super(List_of_chars, self).__init__(args[0])
+        super(Element_sequence, self).__init__(args[0])
 
     def __getitem__(self, index):
-        return super(List_of_chars, self).__getitem__(index)
+        return super(Element_sequence, self).__getitem__(index)
 
     def __setitem__(self, index, value):
-        super(List_of_chars, self).__setitem__(index, value)
+        super(Element_sequence, self).__setitem__(index, value)
     
     def __str__(self) -> str:
         return ''.join([str(x) for x in self])
@@ -28,11 +28,6 @@ class List_of_chars(list):
                 return index
     
     def replace(self, to_replace, replacer):
-        print(f''' to_replave: {to_replace}
-        replacer: {replacer}
-        str: {str(self)}
-        ''')
-        print(self.find_all(to_replace))
         for index in self.find_all(to_replace):
             if len(replacer) == 1:
                 self[index] = replacer

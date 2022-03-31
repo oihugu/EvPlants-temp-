@@ -1,7 +1,7 @@
-from numpy import character, size
+from pyparsing import Char
 
 
-class Character():
+class Element():
     def __init__(self, content, default, size = None, width = None, color = None, angle_diff = None) -> None:
         self.size = size if size != None else default[0]
         self.width = width if width != None else default[1]
@@ -14,6 +14,7 @@ class Character():
     
     def __repr__(self) -> str:
         return 'C(' + str(self.content) + ')'
+    
     ## Setters
     def set_color(self, color) -> None:
         self.color = color
@@ -40,7 +41,7 @@ class Character():
     def get_size(self) -> float:
         return self.size
     
-    def get_content(self) -> character:
+    def get_content(self) -> str:
         return self.content
     
     def get_angle_diff(self) -> float:
