@@ -1,3 +1,4 @@
+import os
 from . import list_of_chars
 from .char import Character
 
@@ -21,3 +22,7 @@ def get_char(char, default, re_write_rules):
                       re_write_rules.get('width'), 
                       re_write_rules.get('color'), 
                       re_write_rules.get('angle_diff'))
+
+def verify_or_create_folder(folder):
+    if not os.path.exists(f'output/{folder}'):
+        os.makedirs(f'output/{folder}')
