@@ -3,10 +3,11 @@ from pyparsing import Char
 
 class Element():
     def __init__(self, content, default, size = None, width = None, color = None, angle_diff = None) -> None:
-        self.size = size if size != None else default[0]
-        self.width = width if width != None else default[1]
-        self.color = color if color != None else default[2]
-        self.angle_diff = angle_diff if angle_diff != None else default[3]
+        self.angle = default['space']['angle']
+        self.size = size if size != None else default['visual']['size']
+        self.width = width if width != None else default['visual']['width']
+        self.color = color if color != None else default['visual']['color']
+        self.angle_diff = angle_diff if angle_diff != None else default['space']['angle_diff']
         self.content = content
 
     def __str__(self) -> str:
@@ -15,6 +16,9 @@ class Element():
     def __repr__(self) -> str:
         return 'C(' + str(self.content) + ')'
     
+    def __eq__(self, other) -> bool:
+        return self.content == other.content
+        
     ## Setters
     def set_color(self, color) -> None:
         self.color = color
@@ -35,9 +39,6 @@ class Element():
     def get_size(self) -> float:
         return self.size
     
-    def get_widt(self) -> float:
-        return self.width
-    
     def get_size(self) -> float:
         return self.size
     
@@ -47,3 +48,11 @@ class Element():
     def get_angle_diff(self) -> float:
         return self.angle_diff
     
+    def get_angle(self) -> float:
+        return self.angle
+    
+    def get_color(self) -> tuple:
+        return self.color
+    
+    def get_width(self) -> float:
+        return self.width

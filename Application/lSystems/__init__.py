@@ -1,31 +1,107 @@
+from Application.lSystems.structure import element_sequence
+from Application.lSystems.structure.line import Linha
+from . utils import *
 from .. import utils
 from . import structure
 
 
 class L_system():
 
-    def __init__(self, initial_string, re_write_rules, size = 1, width = 1, color = '#000000'):
+    __default = {'visual' :{'size': 1, 
+                            'width': 1, 
+                            'color': '#000000'},
+                'space'   :{'position': (0,0),
+                            'angle': 90,
+                            'angle_diff': 33},
+                'canvas'  :{'width': 1000,
+                            'height': 1000}
+                }
+
+    def __init__(self, initial_string, re_write_rules, default = __default):
         '''
         re_write_rules - dicionário com as regras de produção para cada simbolo, podendo conter também, cor, tamanho, grossura da linha e diferença de ângulo
-        symbols - lista de simbolos que não serão ignorados pelo programa
         O caractere padrão para o desenho de uma linha é "F"
         '''
-        self.d_position, self.lines, self.angle, self.angle_diff = (0,0), [], 90, 33 
-        self.size, self.d_width, self.d_color = size, width, color
-        self.default = [self.size, self.d_width, self.d_color, self.angle_diff]
-        self.re_write_rules = utils.general.format_re_write_rules(re_write_rules, self.default)
-        self.stack_pos = utils.data_structures.Stack()
-        self.stack_angle = utils.data_structures.Stack()
+        self.default = {key: utils.general.complete_dictionary(value, self.__default[key]) for key, value in zip(default.keys(), default.values())} # Completa o dicionário de configurações default
+        self.re_write_rules = format_re_write_rules(re_write_rules, self.default)
+        self.lines = []
+
+
         self.angle_operations = {
-            'C(+)' : lambda x : self.angle + self.angle_diff,
-            'C(-)' : lambda x : self.angle - self.angle_diff
+            '+' : self.rotate_right,
+            '-' : self.rotate_left,
         }
         self.position_operators = {
-            'C(F)' : self.draw_segment
+            'F' : self.draw_segment
         }
         self.storage_operators = {
-            'C([)' : self.store_state,
-            'C(])' : self.return_state
+            '[' : self.store_state,
+            ']' : self.return_state
         }
-        self.string = self.compose_string(initial_string, self.re_write_rules)
+
+        self.element_sequece = self.compose_element_sequence(initial_string)
+
+            
+    def compose_element_sequence(self, initial_string):
+        es = Element_sequence([])
+        for i, c in enumerate(initial_string):
+            es.append(Element(c, self.default))
+        return es
     
+
+
+    def compile_element_sequence(self):
+        for i, element in enumerate(self.element_sequece):
+            if element.content in self.angle_operations:
+                self.angle_operations[element.content](i)
+
+            if element.content in self.position_operators:
+                self.position_operators[element.content](i)
+
+    def rotate_right(self, idx, accumulator = 1):
+        if self.element_sequence[idx] == 'C(+)':
+            return self.rotate_right(idx + 1, accumulator + 1)
+        else:
+            self.element_sequece[idx + 1] += accumulator * self.default['space']['angle_diff']
+    
+    def rotate_left(self, idx, accumulator):
+        if self.element_sequence[idx] == 'C(-)':
+            return self.rotate_right(idx + 1, accumulator + 1)
+        else:
+            self.element_sequece[idx + 1] -= accumulator * self.default['space']['angle_diff']
+
+    def draw_segment(self, idx):
+        self.lines.append(Linha(self.element_sequece[idx].get_angle(), 
+                                self.element_sequece[idx].get_size(),
+                                self.element_sequece[idx].get_width(),
+                                self.element_sequece[idx].get_color()))
+    
+    def draw_sequence(self, canvas):
+        for line in self.lines:
+            canvas.add_line(line)
+
+    def store_state(self):
+        self.stack_pos.add(self.position)
+        self.stack_angle.add(self.angle)
+
+    def return_state(self, idx):
+        self.position = self.stack_pos.pop()
+    
+    def run_generation(self):
+        self.re_write()
+        self.compile_element_sequence()
+        
+    def re_write(self):
+        for replacer in self.re_write_rules.keys():
+            self.element_sequece = self.element_sequece.replace(replacer, self.re_write_rules[replacer])
+    
+    def run(self, generations):
+        for i in range(generations):
+            plt = self.run_generation()
+            self.re_write()
+
+        canvas = structure.Canvas(self.default['canvas']['width'], self.default['canvas']['height'])
+        self.draw_sequence(canvas)
+        plt = canvas.draw()
+        return plt
+

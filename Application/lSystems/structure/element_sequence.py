@@ -19,7 +19,6 @@ class Element_sequence(list):
         return super().__repr__()
 
     def find_all(self, elem):
-        print([(a,b) for a,b in enumerate(self)])
         return [i for i, x in enumerate(self) if str(x) == str(elem)]
     
     def find(self, x):
@@ -27,13 +26,17 @@ class Element_sequence(list):
             if x == self.__getitem__(index):
                 return index
     
+    def insert_element_sequence(self, index, element_sequence):
+        for i in range(len(element_sequence)):
+            self.insert(index + i, element_sequence[i])
+
     def replace(self, to_replace, replacer):
         for index in self.find_all(to_replace):
             if len(replacer) == 1:
-                self[index] = replacer
+                self[index] = replacer[0]
             else:
                 del self[index]
-                for a in range(len(replacer)):
-                    self.insert(index + a, replacer[a])
+                self.insert_element_sequence(index, replacer)
         return self
     
+
