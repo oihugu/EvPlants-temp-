@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 
 class Canvas():
@@ -6,16 +7,13 @@ class Canvas():
         self.height = height
         self.lines = []
     
-    def add_line(self, linha):
-        if self.lines == []:
-            linha.start_position = (0,0)
-        else:
-            linha.start_position = self.lines[-1].end_position
-        linha.end_position = linha.start_position + linha.rotate()
+    def add_line(self, linha, idx = -1, stack = []):
+
         self.lines.append(linha)
+        print(self.lines)
 
     def draw(self):
         plt.figure(figsize=(5, 5))
         for line in self.lines:
-            plt.plot(line.start_position, line.end_position, color = line.color, linewidth = line.width)
+            line.plot()
         return plt

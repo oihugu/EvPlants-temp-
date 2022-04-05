@@ -41,6 +41,8 @@ class L_system():
         }
 
         self.element_sequece = self.compose_element_sequence(initial_string)
+        self.stack_store = []
+        self.stack_send = []
 
             
     def compose_element_sequence(self, initial_string):
@@ -50,20 +52,24 @@ class L_system():
         return es
     
     def compile_element_sequence(self):
+        self.lines = []
         for i, element in enumerate(self.element_sequece):
             if element.content in self.angle_operations:
                 self.angle_operations[element.content](i)
 
             if element.content in self.position_operators:
                 self.position_operators[element.content](i)
+            
+            if element.content in self.storage_operators:
+                self.storage_operators[element.content](i)
 
-    def rotate_right(self, idx, accumulator = 1):
+    def rotate_right(self, idx, accumulator = 0):
         if self.element_sequece[idx] == Element('+', self.default):
             return self.rotate_right(idx + 1, accumulator + 1)
         else:
             self.element_sequece[idx].angle += accumulator * self.default['space']['angle_diff']
     
-    def rotate_left(self, idx, accumulator):
+    def rotate_left(self, idx, accumulator = 0):
         if self.element_sequece[idx] == Element('-', self.default):
             return self.rotate_right(idx + 1, accumulator + 1)
         else:
@@ -77,14 +83,13 @@ class L_system():
     
     def draw_sequence(self, canvas):
         for line in self.lines:
-            canvas.add_line(line)
+            canvas.add_line(line, self.stack_pos)
 
-    def store_state(self):
-        self.stack_pos.add(self.position)
-        self.stack_angle.add(self.angle)
+    def store_state(self, idx):
+        self.stack_store.add(idx)
 
     def return_state(self, idx):
-        self.position = self.stack_pos.pop()
+        self.stack_send.add((idx, self.stack_store.pop()))
     
     def run_generation(self):
         self.re_write()
@@ -98,9 +103,18 @@ class L_system():
     def run(self, generations):
         for i in range(generations - 1):
             self.run_generation()
-        plt = self.run_generation()
+        self.run_generation()
         canvas = structure.Canvas(self.default['canvas']['width'], self.default['canvas']['height'])
         self.draw_sequence(canvas)
         plt = canvas.draw()
         return plt
 
+    def add_line(self, linha, idx = -1, stack = []):
+        if self.lines == []:
+            linha.start_position = (0,0)
+        elif idx == stack.top():
+            linha.start_position = self.lines[stack.pop()].end_position
+        else:
+            linha.start_position = self.lines[idx].end_position
+        
+        linha.end_position =  linha.new_end(linha.start_position)
