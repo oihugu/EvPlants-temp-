@@ -2,7 +2,10 @@ from .structure import Element_sequence
 from .structure import Element
 
 def string_to_element_sequence(string, default):
-    return Element_sequence(Element(c, default) for c in string)
+    es = Element_sequence()
+    for c in string:
+        es.append(Element(c, default))
+    return es
 
 def format_re_write_rules(re_write_rules, default):
     keys = list(re_write_rules.keys())

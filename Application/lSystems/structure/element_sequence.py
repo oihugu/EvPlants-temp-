@@ -1,42 +1,59 @@
-class Element_sequence(list):
+class Element_sequence():
 
-    def __init__(self, *args):
-        super(Element_sequence, self).__init__(args[0])
-
+    def __init__(self):
+        self.ls = []
+    
+        
     def __getitem__(self, index):
-        return super(Element_sequence, self).__getitem__(index)
+        return self.ls[index]
 
     def __setitem__(self, index, value):
-        super(Element_sequence, self).__setitem__(index, value)
+        self.ls[index] = value
+    
+    def __len__(self):
+        return len(self.ls)
     
     def __str__(self) -> str:
-        return ''.join([str(x) for x in self])
+        s = 'E[' 
+        for i, x in enumerate(self.ls):
+            if i != len(self.ls) - 1:
+                s += str(x) + ', '
+            else:
+                s += str(x)
+        s += ']'
+        return s
 
-    def __iter__(self):
-        return super().__iter__()
-    
     def __repr__(self) -> str:
-        return super().__repr__()
+        return self.__str__()
 
+    def __delitem__(self, idx):
+        del self.ls[idx]
+ 
     def find_all(self, elem):
-        return [i for i, x in enumerate(self) if str(x) == str(elem)]
+        return [i for i, x in enumerate(self.ls) if str(x) == str(elem)]
     
     def find(self, x):
-        for index in range(self.__len__):
-            if x == self.__getitem__(index):
+        for index in range(len(self.ls)):
+            if x == self.ls[index]:
                 return index
+               
+    def append(self, x):
+        self.ls.append(x)
     
+    def insert(self, index, x):
+        self.ls[index] = x
+        
     def insert_element_sequence(self, index, element_sequence):
-        for i in range(len(element_sequence)):
-            self.insert(index + i, element_sequence[i])
+        if len(element_sequence) == 0:
+            self.insert(index, element_sequence)
+        else:
+            temp_start = self.ls[:index]
+            for i in range(len(element_sequence)):
+                temp_start.append(element_sequence[i])
+            self.ls = temp_start + self.ls[index+1:]
 
     def replace(self, to_replace, replacer):
         for index in self.find_all(to_replace):
-            if len(replacer) == 1:
-                self[index] = replacer[0]
-            else:
-                del self[index]
-                self.insert_element_sequence(index, replacer)
-        return self
-    
+            self.insert_element_sequence(index, replacer)
+        
 

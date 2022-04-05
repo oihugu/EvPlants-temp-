@@ -15,7 +15,7 @@ class Canvas():
         self.lines.append(linha)
 
     def draw(self):
-        plt.figure(figsize=(500, 500))
+        plt.figure(figsize=(5, 5))
         for line in self.lines:
             plt.plot(line.start_position, line.end_position, color = line.color, linewidth = line.width)
         return plt

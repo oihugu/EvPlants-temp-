@@ -14,10 +14,13 @@ class Element():
         return 'C(' + str(self.content) + ')'
     
     def __repr__(self) -> str:
-        return 'C(' + str(self.content) + ')'
+        return self.__str__()
     
     def __eq__(self, other) -> bool:
         return self.content == other.content
+    
+    def __len__(self):
+        return 0
         
     ## Setters
     def set_color(self, color) -> None:

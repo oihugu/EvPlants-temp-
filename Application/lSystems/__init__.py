@@ -1,6 +1,7 @@
 from Application.lSystems.structure import element_sequence
 from Application.lSystems.structure.line import Linha
 from . utils import *
+from .structure import Element
 from .. import utils
 from . import structure
 
@@ -43,13 +44,11 @@ class L_system():
 
             
     def compose_element_sequence(self, initial_string):
-        es = Element_sequence([])
+        es = Element_sequence()
         for i, c in enumerate(initial_string):
             es.append(Element(c, self.default))
         return es
     
-
-
     def compile_element_sequence(self):
         for i, element in enumerate(self.element_sequece):
             if element.content in self.angle_operations:
@@ -59,16 +58,16 @@ class L_system():
                 self.position_operators[element.content](i)
 
     def rotate_right(self, idx, accumulator = 1):
-        if self.element_sequence[idx] == 'C(+)':
+        if self.element_sequece[idx] == Element('+', self.default):
             return self.rotate_right(idx + 1, accumulator + 1)
         else:
-            self.element_sequece[idx + 1] += accumulator * self.default['space']['angle_diff']
+            self.element_sequece[idx].angle += accumulator * self.default['space']['angle_diff']
     
     def rotate_left(self, idx, accumulator):
-        if self.element_sequence[idx] == 'C(-)':
+        if self.element_sequece[idx] == Element('-', self.default):
             return self.rotate_right(idx + 1, accumulator + 1)
         else:
-            self.element_sequece[idx + 1] -= accumulator * self.default['space']['angle_diff']
+            self.element_sequece[idx].angle -= accumulator * self.default['space']['angle_diff']
 
     def draw_segment(self, idx):
         self.lines.append(Linha(self.element_sequece[idx].get_angle(), 
@@ -93,13 +92,13 @@ class L_system():
         
     def re_write(self):
         for replacer in self.re_write_rules.keys():
-            self.element_sequece = self.element_sequece.replace(replacer, self.re_write_rules[replacer])
+            elem = Element(replacer, self.default)
+            self.element_sequece.replace(elem, self.re_write_rules[replacer]["r"])
     
     def run(self, generations):
-        for i in range(generations):
-            plt = self.run_generation()
-            self.re_write()
-
+        for i in range(generations - 1):
+            self.run_generation()
+        plt = self.run_generation()
         canvas = structure.Canvas(self.default['canvas']['width'], self.default['canvas']['height'])
         self.draw_sequence(canvas)
         plt = canvas.draw()
