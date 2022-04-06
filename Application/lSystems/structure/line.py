@@ -29,5 +29,5 @@ class Linha():
                     color = self.color, linewidth = self.width) # [x0,x1], [y0,y1]
 
     def new_end(self, start):
-        self.end_position = self.rotate() + (np.array([0,self.size]) + start)
+        self.end_position = (self.rotate() * np.array([0,self.size])) + start
         return self.end_position
