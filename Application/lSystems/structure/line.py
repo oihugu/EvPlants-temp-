@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 
 class Linha():
     
-    def __init__(self, angle, size, width, color = (0,0,0)):
+    def __init__(self, start, angle, size, width, color = (0,0,0)):
         self.angle = angle
-        self.start_position = None # x0,y0
-        self.end_position = None # x1,y1
+        self.start_position = start # x0,y0
         self.size = size
         self.width = width
         self.color = color
+        self.end_position = self.new_end(self.start_position) # x1,y1
     
     def rotate(self):
         theta = np.radians(self.angle)

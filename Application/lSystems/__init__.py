@@ -52,17 +52,19 @@ class L_system():
         return es
     
     def compile_element_sequence(self):
-        self.lines = []
+        self.zero_state()
+        
         for i, element in enumerate(self.element_sequece):
             if element.content in self.angle_operations:
                 self.angle_operations[element.content](i)
-
+                
             if element.content in self.position_operators:
-                self.position_operators[element.content](i)
-            
+                self.idx_dct[i] = self.position_operators[element.content](i)
+                
             if element.content in self.storage_operators:
                 self.storage_operators[element.content](i)
 
+                
     def rotate_right(self, idx, accumulator = 0):
         if self.element_sequece[idx] == Element('+', self.default):
             return self.rotate_right(idx + 1, accumulator + 1)
@@ -76,20 +78,33 @@ class L_system():
             self.element_sequece[idx].angle -= accumulator * self.default['space']['angle_diff']
 
     def draw_segment(self, idx):
-        self.lines.append(Linha(self.element_sequece[idx].get_angle(), 
+        if self.lines == []:
+            start = [0,0]
+            print(f'1. Começando')
+            
+        elif (self.stack_send != []) and (idx == self.stack_send[-1]):
+            idx_act, idx_store = self.stack_send.pop()
+            start = self.lines[self.idx_dct[idx_store]]
+            print(f'2. Retriving Stored -> {start}')
+            
+        else:
+            start = self.lines[-1].end_position
+            print(f'3. Retriving -> {start}')
+            
+        self.lines.append(Linha(start,
+                                self.element_sequece[idx].get_angle(), 
                                 self.element_sequece[idx].get_size(),
                                 self.element_sequece[idx].get_width(),
                                 self.element_sequece[idx].get_color()))
-    
-    def draw_sequence(self, canvas):
-        for line in self.lines:
-            canvas.add_line(line, self.stack_pos)
+        
+        return len(self.lines) - 1
 
     def store_state(self, idx):
-        self.stack_store.add(idx)
+        self.stack_store.append(idx)
 
     def return_state(self, idx):
-        self.stack_send.add((idx, self.stack_store.pop()))
+        print(f'## stack_store -> {self.stack_store}')
+        self.stack_send.append((idx, self.stack_store.pop()))
     
     def run_generation(self):
         self.re_write()
@@ -104,12 +119,17 @@ class L_system():
         for i in range(generations - 1):
             self.run_generation()
         self.run_generation()
-        canvas = structure.Canvas(self.default['canvas']['width'], self.default['canvas']['height'])
-        self.draw_sequence(canvas)
+        canvas = structure.Canvas(self.default['canvas']['width'], self.default['canvas']['height'], self.lines)
         plt = canvas.draw()
         return plt
-
-    def add_line(self, linha, idx = -1, stack = []):
+    
+    def zero_state(self):
+        self.lines = []
+        self.stack_send = []
+        self.stack_store = []
+        self.idx_dct = {}
+        
+    '''def add_line(self, linha, idx = -1, stack = []):
         if self.lines == []:
             linha.start_position = (0,0)
         elif idx == stack.top():
@@ -117,4 +137,8 @@ class L_system():
         else:
             linha.start_position = self.lines[idx].end_position
         
-        linha.end_position =  linha.new_end(linha.start_position)
+        linha.end_position =  linha.new_end(linha.start_position)'''
+    
+    '''def draw_sequence(self, canvas):
+        for line in self.lines:
+            canvas.add_line(line)'''
